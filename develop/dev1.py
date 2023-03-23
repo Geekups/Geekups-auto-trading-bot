@@ -1,6 +1,5 @@
 
 # Simple Moving Average Crossover Strategy
-
 import MetaTrader5 as mt5  # install using 'pip install MetaTrader5'
 import pandas as pd  # install using 'pip install pandas'
 from datetime import datetime
