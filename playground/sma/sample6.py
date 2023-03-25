@@ -1,5 +1,5 @@
 import MetaTrader5 as mt5
-import talib
+import ta_lib
 
 # establish connection to MetaTrader 5 terminal
 if not mt5.initialize():

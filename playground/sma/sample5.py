@@ -1,5 +1,5 @@
 import MetaTrader5 as mt5
-import talib
+import ta_lib
 import datetime
 
 # establish connection to MetaTrader 5 terminal

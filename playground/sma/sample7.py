@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 from talib import RSI
 import MetaTrader5 as mt5
-
+from datetime import datetime
+import matplotlib.pyplot as plt 
 symbol = "EURUSD"
 lot = 0.02 
-
+5
 # Get the Data
 # mt5.initialize( login = name, server = serv, password = key, path = path)
 mt5.initialize()
@@ -33,4 +34,10 @@ while True:
     rates_frame['custom signal'] = np.where(rates_frame['rsi'] > 2*rates_frame['rsi_roll_std'], 'Sell',
         np.where(rates_frame['rsi'] < 2*rates_frame['rsi_roll_std'], 'Buy', '')
     )
-    a=3
+    
+    print('time: ', datetime.now())    #print('exposure: ', exposure)
+   
+    #print('signal: ', direction)
+    print("symbo_info",symbol_info)
+    print("position is opened. ")
+    print('-------\n')
