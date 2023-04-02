@@ -4,47 +4,48 @@ from talib import RSI
 import MetaTrader5 as mt5
 from datetime import datetime
 
-lot = 0.02
+# function to get the exposure of a symbol
+def get_exposure(symbol):
+    positions = mt5.positions_get(symbol=symbol)
+    if positions:
+        pos_df = pd.DataFrame(positions, columns=positions[0]._asdict().keys())
+        exposure = pos_df['volume'].sum()
 
-# Get the Data
+        return exposure
 
-mt5.initialize()
-
-while True:
-    symbol_info=mt5.symbol_info("EURUSD")
-    rates = mt5.copy_rates_from_pos("EURUSD", mt5.TIMEFRAME_M1, 0, 1000)
+def get_rates_frame(symbol):
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 1000)
     rates_frame = pd.DataFrame(rates)
+    return rates_frame
 
+def signal(rates_frame):
     rates_frame["time"]=pd.to_datetime(rates_frame["time"], unit="s")
-
-    #Create signal
-
     close = np.array(rates_frame["close"])
-
-    #Create the RSI indicator
-
     rates_frame["rsi"] = RSI(close, timeperiod = 14)
-
-    #Create the Rolling mean
-
     rates_frame["rsi_roll_mean"] = rates_frame["rsi"].rolling(10).mean()
-
-    #Create the Rolling std
-
     rates_frame["rsi_roll_std"] = rates_frame["rsi"].rolling(10).std()
-
-    #Create the custom signal
-
     rates_frame["custom signal"] = np.where(rates_frame["rsi"] > 2*rates_frame["rsi_roll_std"], "Sell",
-
     np.where(rates_frame["rsi"] < 2*rates_frame["rsi_roll_std"], "Buy", ""))
+    
+    return rates_frame["custom signal"]
 
-    print('time: ', datetime.now())
-    # print('exposure: ', exposure)
-    # print('last_close: ', last_close)
-    # print('sma: ', sma)
-    # print('signal: ', direction)
-    # print(SYMBOL)
-    print("position is opened. ")
-    print('-------\n')
+if __name__ == '__main__':
+    #lot = 0.02
+    mt5.initialize()
+    SYMBOL = "EURUSD"
+    while True:
+        exposure = get_exposure(SYMBOL)
+
+        rates_frame = get_rates_frame("EURUSD")
+
+        directions = signal(rates_frame)
+        for direction in directions.values :
+            print('time: ', datetime.now())
+            print('exposure: ', exposure)
+            #print('last_close: ', last_close)
+            # print('sma: ', sma)
+            print('signal: ', direction)
+            print(SYMBOL)
+            #print("position is opened. ")
+            print('-------\n')
 
