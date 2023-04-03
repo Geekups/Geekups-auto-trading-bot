@@ -8,36 +8,40 @@ import time
 import talib
 from talib import RSI, EMA
 
+symbol = "EURUSD"
+lot = 0.02 
+
+# Get the Data
+mt5.initialize()
+symbol_info=mt5.symbol_info("EURUSD")
+            
+rates = mt5.copy_rates_from_pos("EURUSD", mt5.TIMEFRAME_M1, 0, 1000)
+rates_frame = pd.DataFrame(rates)
+rates_frame['time']=pd.to_datetime(rates_frame['time'], unit='s')         
 
 while True:
-    symbol = "EURUSD"
-    lot = 0.02 
 
-    # Get the Data
-    mt5.initialize()
-            
-    symbol_info=mt5.symbol_info("EURUSD")
-            
-    rates = mt5.copy_rates_from_pos("EURUSD", mt5.TIMEFRAME_M1, 0, 1000)
-    rates_frame = pd.DataFrame(rates)
-    rates_frame['time']=pd.to_datetime(rates_frame['time'], unit='s')
+
 
     #Signal Processing
 
-    close = np.array(rates_frame['close'])
-    rsi_ind = RSI(close, timeperiod = 14)
-    array_length = len(rsi_ind)
-    last_element = rsi_ind[- 1]
-    last_rsi = last_element
-    array_length3 = len(close)
-    last_element3 = close[-1]
-    last_price = last_element3
+    # close = np.array(rates_frame['close'])
+    # rsi_ind = RSI(close, timeperiod = 14)
+    
+    
+    # last_rsi = rsi_ind[-1]
     price = mt5.symbol_info_tick(symbol).ask
-    deviation = 20
 
+    close = np.array(rates_frame["close"])
+    rates_frame["rsi"] = RSI(close, timeperiod = 14)
+    rates_frame["rsi_roll_mean"] = rates_frame["rsi"].rolling(10).mean()
+    rates_frame["rsi_roll_std"] = rates_frame["rsi"].rolling(10).std()
+    rates_frame["custom signal"] = np.where(rates_frame["rsi"] > 2*rates_frame["rsi_roll_std"], "Sell",
+    np.where(rates_frame["rsi"] < 2*rates_frame["rsi_roll_std"], "Buy", ""))
+    
     #Decission Taking and Send Order
 
-    if last_rsi>70  :
+    if rates_frame["rsi"] > 2*rates_frame["rsi_roll_std"]  :
         request = {
                     "action": mt5.TRADE_ACTION_DEAL,
                     "symbol": symbol,
@@ -45,7 +49,7 @@ while True:
                     "type": mt5.ORDER_TYPE_SELL,
                     "sl": price - 0.002,
                     "tp": price + 0.005,
-                    "deviation": deviation,
+                    "deviation": rates_frame["rsi_roll_std"],
                     "magic": 202003,
                     "comment": "InUpBot MrEurUsd",
                     "type_time": mt5.ORDER_TIME_GTC,
@@ -62,7 +66,7 @@ while True:
         continue
                 
                 
-    if 30>last_rsi :
+    if rates_frame["rsi"] < 2*rates_frame["rsi_roll_std"] :
         request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": symbol,
@@ -70,7 +74,7 @@ while True:
                 "type": mt5.ORDER_TYPE_BUY,
                 "sl": price + 0.002,
                 "tp": price - 0.005,
-                "deviation": deviation,
+                "deviation": rates_frame["rsi_roll_std"],
                 "magic": 202003,
                 "comment": "InUpBot Lancero",
                 "type_time": mt5.ORDER_TIME_GTC,
