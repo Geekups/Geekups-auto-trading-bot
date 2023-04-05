@@ -71,14 +71,14 @@ def get_exposure(symbol):
 
         return exposure
 
-
 # function to look for trading signals
 def signal(symbol, timeframe, rsi_period, rsi_buy_threshold, rsi_sell_threshold):
     bars = mt5.copy_rates_from_pos(symbol, timeframe, 1, rsi_period)
     bars_df = pd.DataFrame(bars)
 
     close = bars_df.close.values
-    rsi = talib.RSI(close, timeperiod=rsi_period)
+    close_series = pd.Series(close)   #ezafe shode
+    rsi = talib.RSI(close_series, timeperiod=rsi_period)
 
     last_close = close[-1]
     last_rsi = rsi[-1]
@@ -148,5 +148,3 @@ if __name__ == '__main__':
 
         # update every 1 second
         time.sleep(1)
-
-        # 
