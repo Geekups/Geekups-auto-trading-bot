@@ -139,7 +139,6 @@ if __name__ == '__main__':
         print('time: ', datetime.now())
         print('exposure: ', exposure)
         print('last_close: ', last_close)
-        print('sma: ', sma)
         print('rsi: ', rsi[-1])
         print('signal: ', direction)
         print(SYMBOL)
