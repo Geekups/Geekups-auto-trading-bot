@@ -1,10 +1,10 @@
 
-# Simple Moving Average Crossover Strategy
-
-import MetaTrader5 as mt5  # install using 'pip install MetaTrader5'
-import pandas as pd  # install using 'pip install pandas'
+import MetaTrader5 as mt5 
 from datetime import datetime
 import time
+import talib as ta
+import pandas as pd
+import matplotlib.pyplot as plt 
 
 
 # function to send a market order
@@ -26,7 +26,7 @@ def market_order(symbol, volume, order_type, **kwargs):
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": mt5.ORDER_FILLING_IOC,
     }
-
+    
     order_result = mt5.order_send(request)
     print(order_result)
 
